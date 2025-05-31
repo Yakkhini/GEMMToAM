@@ -143,45 +143,15 @@ int main() {
   double *C = (double *)malloc(m * n * sizeof(double)); // C = (m,n)
   double *D = (double *)malloc(m * n * sizeof(double)); // D = (m,n)
 
-  struct timeval start_row, start_col, finish_row, finish_col;
-  double gflops = 2.0 * m * n * k * 1.0e-09;
-  srand((unsigned)time(NULL));
-
-  if (A == NULL || B == NULL || C == NULL) {
-    printf("Out of Memory!\n");
-    exit(EXIT_FAILURE);
-  }
-
   random_init(m, k, A, m, 0);
   random_init(k, n, B, k, 0);
 
-  gettimeofday(&start_row, NULL);
   matmul_row(m, n, k, A, m, B, k, C, m);
-  gettimeofday(&finish_row, NULL);
-
-  double duration_row =
-      ((double)(finish_row.tv_sec - start_row.tv_sec) * 1000000 +
-       (double)(finish_row.tv_usec - start_row.tv_usec)) /
-      1000000;
 
   random_init(m, k, A, m, 1);
   random_init(k, n, B, k, 1);
 
-  gettimeofday(&start_col, NULL);
   matmul_col(m, n, k, A, m, B, k, D, m);
-  gettimeofday(&finish_col, NULL);
-
-  double duration_col =
-      ((double)(finish_col.tv_sec - start_col.tv_sec) * 1000000 +
-       (double)(finish_col.tv_usec - start_col.tv_usec)) /
-      1000000;
-
-  printf(
-      "Naive : Dot product with row major order took %f seconds GFLOPS : %f\n",
-      duration_row, gflops / duration_row);
-  printf(
-      "Naive : Dot product with col major order took %f seconds GFLOPS : %f\n",
-      duration_col, gflops / duration_col);
 
   free(A);
   free(B);
