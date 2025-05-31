@@ -24,9 +24,9 @@ void random_init(int m, int n, double *a, int lda, int type) {
   for (int j = 0; j < n; j++) {
     for (int i = 0; i < m; i++) {
       if (type == 0)
-        A_row(i, j) = 2.0 * drand48() - 1.0;
+        A_row(i, j) = 2.0 * rand() - 1.0;
       else
-        A_col(i, j) = 2.0 * drand48() - 1.0;
+        A_col(i, j) = 2.0 * rand() - 1.0;
     }
   }
 }
