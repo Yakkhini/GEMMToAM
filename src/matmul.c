@@ -15,8 +15,8 @@
 
 /* Routine for computing C = A * B + C */
 
-void matmul(int m, int n, int k, double *a, int lda, double *b, int ldb,
-            double *c, int ldc) {
+void matmul(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
+            fixedpt *c, int ldc) {
   /*
   Computes the matrix multiplication of A and B and stores in C.
   C = A*B + C
@@ -56,11 +56,11 @@ void matmul(int m, int n, int k, double *a, int lda, double *b, int ldb,
   return;
 }
 
-void InnerKernel(int m, int n, int k, double *a, int lda, double *b, int ldb,
-                 double *c, int ldc, int first_time) {
+void InnerKernel(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
+                 fixedpt *c, int ldc, int first_time) {
   int i, j;
-  double *packedA = (double *)calloc(m * k, sizeof(double));
-  double *packedB = (double *)calloc(kc * nb, sizeof(double));
+  fixedpt *packedA = (fixedpt *)calloc(m * k, sizeof(fixedpt));
+  fixedpt *packedB = (fixedpt *)calloc(kc * nb, sizeof(fixedpt));
 
   for (j = 0; j < n; j += 4) {
     if (first_time)
@@ -73,10 +73,10 @@ void InnerKernel(int m, int n, int k, double *a, int lda, double *b, int ldb,
   }
 }
 
-void PackMatrixA(int k, double *a, int lda, double *a_to) {
+void PackMatrixA(int k, fixedpt *a, int lda, fixedpt *a_to) {
   int j;
   for (j = 0; j < k; j++) { /* loop over columns of A */
-    double *a_ij_pntr = &A(0, j);
+    fixedpt *a_ij_pntr = &A(0, j);
     *a_to = *a_ij_pntr;
     *(a_to + 1) = *(a_ij_pntr + 1);
     *(a_to + 2) = *(a_ij_pntr + 2);
@@ -86,10 +86,10 @@ void PackMatrixA(int k, double *a, int lda, double *a_to) {
   }
 }
 
-void PackMatrixB(int k, double *b, int ldb, double *b_to) {
+void PackMatrixB(int k, fixedpt *b, int ldb, fixedpt *b_to) {
   int i;
-  double *b_i0_pntr = &B(0, 0), *b_i1_pntr = &B(0, 1), *b_i2_pntr = &B(0, 2),
-         *b_i3_pntr = &B(0, 3);
+  fixedpt *b_i0_pntr = &B(0, 0), *b_i1_pntr = &B(0, 1), *b_i2_pntr = &B(0, 2),
+          *b_i3_pntr = &B(0, 3);
 
   for (i = 0; i < k; i++) { /* loop over rows of B */
     *b_to++ = *b_i0_pntr++;
@@ -101,10 +101,10 @@ void PackMatrixB(int k, double *b, int ldb, double *b_to) {
 
 typedef union {
   __m128d v;
-  double d[2];
+  fixedpt d[2];
 } v2df_t;
 
-void AddDot4x4(int k, double *a, int lda, double *b, int ldb, double *c,
+void AddDot4x4(int k, fixedpt *a, int lda, fixedpt *b, int ldb, fixedpt *c,
                int ldc) {
   /* So, this routine computes a 4x4 block of matrix A
            C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
@@ -136,14 +136,14 @@ void AddDot4x4(int k, double *a, int lda, double *b, int ldb, double *c,
   c_23_c_33_vreg.v = _mm_setzero_pd();
 
   for (p = 0; p < k; p++) {
-    a_0p_a_1p_vreg.v = _mm_load_pd((double *)a);
-    a_2p_a_3p_vreg.v = _mm_load_pd((double *)(a + 2));
+    a_0p_a_1p_vreg.v = _mm_load_pd((fixedpt *)a);
+    a_2p_a_3p_vreg.v = _mm_load_pd((fixedpt *)(a + 2));
     a += 4;
 
-    b_p0_vreg.v = _mm_loaddup_pd((double *)b);       /* load and duplicate */
-    b_p1_vreg.v = _mm_loaddup_pd((double *)(b + 1)); /* load and duplicate */
-    b_p2_vreg.v = _mm_loaddup_pd((double *)(b + 2)); /* load and duplicate */
-    b_p3_vreg.v = _mm_loaddup_pd((double *)(b + 3)); /* load and duplicate */
+    b_p0_vreg.v = _mm_loaddup_pd((fixedpt *)b);       /* load and duplicate */
+    b_p1_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 1)); /* load and duplicate */
+    b_p2_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 2)); /* load and duplicate */
+    b_p3_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 3)); /* load and duplicate */
     b += 4;
 
     /* First row and second rows */
