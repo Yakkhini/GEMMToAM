@@ -59,8 +59,8 @@ void matmul(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
 void InnerKernel(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
                  fixedpt *c, int ldc, int first_time) {
   int i, j;
-  fixedpt *packedA = (fixedpt *)calloc(m * k, sizeof(fixedpt));
-  fixedpt *packedB = (fixedpt *)calloc(kc * nb, sizeof(fixedpt));
+  fixedpt *packedA = (fixedpt *)malloc(m * k * sizeof(fixedpt));
+  fixedpt *packedB = (fixedpt *)malloc(kc * nb * sizeof(fixedpt));
 
   for (j = 0; j < n; j += 4) {
     if (first_time)
