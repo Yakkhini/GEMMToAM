@@ -4,6 +4,10 @@
 
 #include "fixedpt.h"
 
+#define A(i, j) a[(j) * lda + (i)]
+#define B(i, j) b[(j) * ldb + (i)]
+#define C(i, j) c[(j) * ldc + (i)]
+
 #define A_row(i, j) a[(i) * lda + (j)]
 #define B_row(i, j) b[(i) * ldb + (j)]
 #define C_row(i, j) c[(i) * ldc + (j)]
@@ -23,3 +27,7 @@ void matmul(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
 void serial_init(int m, int n, fixedpt *a, int lda, int type);
 void random_init(int m, int n, fixedpt *a, int lda, int type);
 void display(fixedpt *matrix, int m, int n, int type);
+
+void serial_init_notype(int m, int n, fixedpt *a, int lda);
+void random_init_notype(int m, int n, fixedpt *a, int lda);
+void display_notype(fixedpt *matrix, int m, int n);

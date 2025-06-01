@@ -1,5 +1,30 @@
 #include <gemm.h>
 
+void serial_init_notype(int m, int n, fixedpt *a, int lda) {
+  int count = 1;
+  for (int j = 0; j < n; j++) {
+    for (int i = 0; i < m; i++)
+      A(i, j) = count++;
+  }
+}
+
+void random_init_notype(int m, int n, fixedpt *a, int lda) {
+  for (int j = 0; j < n; j++) {
+    for (int i = 0; i < m; i++)
+      A(i, j) = 2 * rand() - 1;
+  }
+}
+
+void display_notype(fixedpt *matrix, int m, int n) {
+  for (int j = 0; j < n; j++) {
+    for (int i = 0; i < m; i++) {
+      printf("%f ", matrix[j * m + i]);
+    }
+    printf("\n");
+  }
+  return;
+}
+
 void serial_init(int m, int n, fixedpt *a, int lda, int type) {
   int count = 1;
   for (int j = 0; j < n; j++) {
