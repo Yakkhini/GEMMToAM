@@ -17,13 +17,13 @@ int main() {
 
   if (m <= 8) {
     printf("Matrix A : \n");
-    display(A, m, k);
+    display_notype(A, m, k);
 
     printf("Matrix B : \n");
-    display(B, k, n);
+    display_notype(B, k, n);
 
     printf("Dot Product Result : \n");
-    display(C, m, n);
+    display_notype(C, m, n);
   }
 
   return 0;
