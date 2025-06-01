@@ -1,3 +1,4 @@
+#include "fixedpt.h"
 #include <gemm.h>
 
 #define A_row(i, j) a[(i) * lda + (j)]
@@ -8,7 +9,7 @@
 #define B_col(i, j) b[(j) * ldb + (i)]
 #define C_col(i, j) c[(j) * ldc + (i)]
 
-void serial_init(int m, int n, double *a, int lda, int type) {
+void serial_init(int m, int n, fixedpt *a, int lda, int type) {
   int count = 1;
   for (int j = 0; j < n; j++) {
     for (int i = 0; i < m; i++) {
@@ -20,18 +21,18 @@ void serial_init(int m, int n, double *a, int lda, int type) {
   }
 }
 
-void random_init(int m, int n, double *a, int lda, int type) {
+void random_init(int m, int n, fixedpt *a, int lda, int type) {
   for (int j = 0; j < n; j++) {
     for (int i = 0; i < m; i++) {
       if (type == 0)
-        A_row(i, j) = 2.0 * rand() - 1.0;
+        A_row(i, j) = 2 * rand() - 1;
       else
-        A_col(i, j) = 2.0 * rand() - 1.0;
+        A_col(i, j) = 2 * rand() - 1;
     }
   }
 }
 
-void display(double *matrix, int m, int n, int type) {
+void display(fixedpt *matrix, int m, int n, int type) {
   if (type == 0) {
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
@@ -50,8 +51,8 @@ void display(double *matrix, int m, int n, int type) {
   return;
 }
 
-void matmul_row(int m, int n, int k, double *a, int lda, double *b, int ldb,
-                double *c, int ldc) {
+void matmul_row(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
+                fixedpt *c, int ldc) {
   /*
   Computes the matrix multiplication of A and B and stores in C.
 
@@ -91,8 +92,8 @@ void matmul_row(int m, int n, int k, double *a, int lda, double *b, int ldb,
   return;
 }
 
-void matmul_col(int m, int n, int k, double *a, int lda, double *b, int ldb,
-                double *c, int ldc) {
+void matmul_col(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
+                fixedpt *c, int ldc) {
   /*
   Computes the matrix multiplication of A and B and stores in C.
   C = A*B + C
@@ -125,7 +126,10 @@ void matmul_col(int m, int n, int k, double *a, int lda, double *b, int ldb,
   for (int i = 0; i < m; i++) {
     for (int j = 0; j < n; j++) {
       for (int p = 0; p < k; p++) {
-        C_col(i, j) = C_col(i, j) + A_col(i, p) * B_col(p, j);
+        // C_col(i, j) = C_col(i, j) + A_col(i, p) * B_col(p, j);
+
+        fixedpt ab_mul = fixedpt_mul(A_col(i, p), B_col(p, j));
+        C_col(i, j) = fixedpt_add(C_col(i, j), ab_mul);
       }
     }
   }
@@ -138,10 +142,10 @@ int main() {
   int n = 2000;
   int k = 2000;
 
-  double *A = (double *)malloc(m * k * sizeof(double)); // A = (m,k)
-  double *B = (double *)malloc(k * n * sizeof(double)); // B = (k,n)
-  double *C = (double *)malloc(m * n * sizeof(double)); // C = (m,n)
-  double *D = (double *)malloc(m * n * sizeof(double)); // D = (m,n)
+  fixedpt *A = (fixedpt *)malloc(m * k * sizeof(fixedpt)); // A = (m,k)
+  fixedpt *B = (fixedpt *)malloc(k * n * sizeof(fixedpt)); // B = (k,n)
+  fixedpt *C = (fixedpt *)malloc(m * n * sizeof(fixedpt)); // C = (m,n)
+  fixedpt *D = (fixedpt *)malloc(m * n * sizeof(fixedpt)); // D = (m,n)
 
   random_init(m, k, A, m, 0);
   random_init(k, n, B, k, 0);
