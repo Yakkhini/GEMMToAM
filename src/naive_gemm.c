@@ -138,9 +138,9 @@ void matmul_col(int m, int n, int k, fixedpt *a, int lda, fixedpt *b, int ldb,
 
 int main() {
 
-  int m = 2000;
-  int n = 2000;
-  int k = 2000;
+  int m = 20;
+  int n = 20;
+  int k = 20;
 
   fixedpt *A = (fixedpt *)malloc(m * k * sizeof(fixedpt)); // A = (m,k)
   fixedpt *B = (fixedpt *)malloc(k * n * sizeof(fixedpt)); // B = (k,n)
