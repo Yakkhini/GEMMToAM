@@ -69,6 +69,8 @@
  * SUCH DAMAGE.
  */
 
+#include <stdint.h>
+
 #ifndef FIXEDPT_BITS
 #define FIXEDPT_BITS 32
 #endif
