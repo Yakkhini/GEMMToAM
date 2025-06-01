@@ -72,8 +72,10 @@
 #include <stdint.h>
 
 #ifndef FIXEDPT_BITS
-#define FIXEDPT_BITS 32
+#define FIXEDPT_BITS 64
 #endif
+
+#define FIXEDPT_NO_SSE
 
 #if FIXEDPT_BITS == 32
 typedef int32_t fixedpt;
@@ -94,7 +96,7 @@ typedef int64_t fixedpt;
 typedef uint64_t fixedptu;
 
 #if !defined(FIXEDPT_NO_SSE)
-typedef __int128_t fixedptd;
+typedef int128_t fixedptd;
 typedef __uint128_t fixedptud;
 #endif
 
@@ -103,7 +105,7 @@ typedef __uint128_t fixedptud;
 #endif
 
 #ifndef FIXEDPT_WBITS
-#define FIXEDPT_WBITS 24
+#define FIXEDPT_WBITS 56
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
