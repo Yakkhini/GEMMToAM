@@ -50,3 +50,29 @@
 
 * SIMD 操作通常为 4 个一组，考虑实现 Batch 模式运算；
 * 对于先乘后加的操作 `C = C + A * B`，考虑通过一条 CISC 原子指令实现。
+
+## 事务接口约定
+
+考虑目前版本的 IP 核为 RV32E 架构，总线数据宽度为 32 位，指针长度为 8 位，约定通过具体地址 `0xa2000000` 写入或读取 32 位长数据作为指令信息与设备通信（MMIO 方案）。
+
+### 指令格式约定
+
+32 位长指令约定如下：
+
+* [7, 0]: Pointer of `fixedpt` as source 1;
+* [15, 8]: Pointer of `fixedpt` as source 2;
+* [23, 16]: Pointer of `fixedpt` as source & destination 3;
+* [31, 24]: Operands field.
+
+其中：
+
+* 源数据指针可以缺省提供，全零为 `null`；
+* Operands 有加法替代 `addpd`，乘法替代 `mulpd`，初始化零数据替代 `__mm_setzero_pd`，复制替代 `__mm_loaddup_pd`，考虑 CISC 操作提供乘加指令 `dest3 = src3 + src2 * src1`。
+
+### abstract-machine 运行层定义
+
+对 abstract-machine（AM）运行层作以下改动：
+
+1. 注册设备地址 `0xa2000000`;
+2. 写驱动操作，约束操作为内联汇编；
+3. 写包装函数供程序调用。
