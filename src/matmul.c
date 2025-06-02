@@ -128,17 +128,19 @@ typedef union {
  *
  * Additional Instructions from disassembly with `objdump -d` command:
  * `addpd`: SSE2 `__mm_add_pd` Add packed double-precision (64-bit)
- * floating-point elements in a and b, and store the results in dst. `mulpd`:
- * SSE3 `__mm_mul_pd` Multiply packed double-precision (64-bit) floating-point
- * elements in a and b, and store the results in dst.
+ * floating-point elements in a and b, and store the results in dst.
+ * `mulpd`: SSE3 `__mm_mul_pd` Multiply packed double-precision (64-bit)
+ * floating-point elements in a and b, and store the results in dst.
  *
  * Other not important instructions:
- * Like `*sd` `unpckhpd` compiler will handle them after use `fixedpt` data type
+ * Like `*sd` `unpckhpd` compiler will handle them after use `fixedpt` data
+ * type.
  *
  * Reference:
  * Intel User Guide:
- * https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html LLVM
- * `emmintrin.h` Reference: https://clang.llvm.org/doxygen/emmintrin_8h.html
+ * https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
+ * LLVM `emmintrin.h` Reference:
+ * https://clang.llvm.org/doxygen/emmintrin_8h.html
  * LLVM `pmmintrin.h` Reference:
  * https://clang.llvm.org/doxygen/pmmintrin_8h.html
  *
