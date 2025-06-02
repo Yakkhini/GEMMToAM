@@ -99,11 +99,50 @@ void PackMatrixB(int k, fixedpt *b, int ldb, fixedpt *b_to) {
   }
 }
 
+/*
+ * In Intel SIMD intructions, use 128-bit vectors to store two double-precision
+ * numbers. We use a virtual mmio-coprocessor with proper interface.
+ *
+ * */
 typedef union {
   __m128d v;
   fixedpt d[2];
 } v2df_t;
 
+/*
+ * In `AddDot4x4` there is several SSE2 & SSE3 SIMD operations that we need to
+ * implement the alternative for.
+ *
+ * Include Header files:
+ * <emmintrin.h> SSE2
+ * <pmmintrin.h> SSE3
+ *
+ * Operations:
+ * `__mm_setzero_pd()`: SSE2 `xorpd xmm, xmm` Return vector of type `__m128d`
+ * with all elements set to zero
+ * `__mm_load_pd()`: SSE2 `movapd xmm, m128` Load two double-precision
+ * floating-point values from memory into a pointer of type `__m128d`
+ * `__mm_loaddup_pd()`: SSE3 `movddup xmm, m64` Load a double-precision
+ * floating-point value from memory and duplicate it to both elements of the
+ * vector
+ *
+ * Additional Instructions from disassembly with `objdump -d` command:
+ * `addpd`: SSE2 `__mm_add_pd` Add packed double-precision (64-bit)
+ * floating-point elements in a and b, and store the results in dst. `mulpd`:
+ * SSE3 `__mm_mul_pd` Multiply packed double-precision (64-bit) floating-point
+ * elements in a and b, and store the results in dst.
+ *
+ * Other not important instructions:
+ * Like `*sd` `unpckhpd` compiler will handle them after use `fixedpt` data type
+ *
+ * Reference:
+ * Intel User Guide:
+ * https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html LLVM
+ * `emmintrin.h` Reference: https://clang.llvm.org/doxygen/emmintrin_8h.html
+ * LLVM `pmmintrin.h` Reference:
+ * https://clang.llvm.org/doxygen/pmmintrin_8h.html
+ *
+ * */
 void AddDot4x4(int k, fixedpt *a, int lda, fixedpt *b, int ldb, fixedpt *c,
                int ldc) {
   /* So, this routine computes a 4x4 block of matrix A
