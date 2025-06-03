@@ -2,9 +2,9 @@
 
 int main() {
 
-  int m = 2000;
-  int n = 2000;
-  int k = 2000;
+  int m = 20;
+  int n = 20;
+  int k = 20;
 
   fixedpt *A = (fixedpt *)malloc(m * k * sizeof(fixedpt));
   fixedpt *B = (fixedpt *)malloc(k * n * sizeof(fixedpt));
