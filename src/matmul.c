@@ -1,3 +1,4 @@
+#include "klib.h"
 #include <gemm.h>
 
 /* Create macros so that the matrices are stored in column-major order */
@@ -105,7 +106,6 @@ void PackMatrixB(int k, fixedpt *b, int ldb, fixedpt *b_to) {
  *
  * */
 typedef union {
-  __m128d v;
   fixedpt d[2];
 } v2df_t;
 
@@ -167,37 +167,68 @@ void AddDot4x4(int k, fixedpt *a, int lda, fixedpt *b, int ldb, fixedpt *c,
       a_0p_a_1p_vreg, a_2p_a_3p_vreg, b_p0_vreg, b_p1_vreg, b_p2_vreg,
       b_p3_vreg;
 
-  c_00_c_10_vreg.v = _mm_setzero_pd();
-  c_01_c_11_vreg.v = _mm_setzero_pd();
-  c_02_c_12_vreg.v = _mm_setzero_pd();
-  c_03_c_13_vreg.v = _mm_setzero_pd();
-  c_20_c_30_vreg.v = _mm_setzero_pd();
-  c_21_c_31_vreg.v = _mm_setzero_pd();
-  c_22_c_32_vreg.v = _mm_setzero_pd();
-  c_23_c_33_vreg.v = _mm_setzero_pd();
+  // c_00_c_10_vreg.v = _mm_setzero_pd();
+  // c_01_c_11_vreg.v = _mm_setzero_pd();
+  // c_02_c_12_vreg.v = _mm_setzero_pd();
+  simd_setzero((uintptr_t)&c_00_c_10_vreg, (uintptr_t)&c_01_c_11_vreg,
+               (uintptr_t)&c_02_c_12_vreg);
+  // c_03_c_13_vreg.v = _mm_setzero_pd();
+  // c_20_c_30_vreg.v = _mm_setzero_pd();
+  // c_21_c_31_vreg.v = _mm_setzero_pd();
+  simd_setzero((uintptr_t)&c_03_c_13_vreg, (uintptr_t)&c_20_c_30_vreg,
+               (uintptr_t)&c_21_c_31_vreg);
+  // c_22_c_32_vreg.v = _mm_setzero_pd();
+  // c_23_c_33_vreg.v = _mm_setzero_pd();
+  simd_setzero((uintptr_t)&c_22_c_32_vreg, (uintptr_t)&c_23_c_33_vreg, 0x00);
 
   for (p = 0; p < k; p++) {
-    a_0p_a_1p_vreg.v = _mm_load_pd((fixedpt *)a);
-    a_2p_a_3p_vreg.v = _mm_load_pd((fixedpt *)(a + 2));
+    // a_0p_a_1p_vreg.v = _mm_load_pd((fixedpt *)a);
+    simd_load((uintptr_t)&a_0p_a_1p_vreg, (uintptr_t)(a));
+    // a_2p_a_3p_vreg.v = _mm_load_pd((fixedpt *)(a + 2));
+    simd_load((uintptr_t)&a_2p_a_3p_vreg, (uintptr_t)(a + 2));
     a += 4;
 
-    b_p0_vreg.v = _mm_loaddup_pd((fixedpt *)b);       /* load and duplicate */
-    b_p1_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 1)); /* load and duplicate */
-    b_p2_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 2)); /* load and duplicate */
-    b_p3_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 3)); /* load and duplicate */
+    // b_p0_vreg.v = _mm_loaddup_pd((fixedpt *)b);
+    simd_loaddup((uintptr_t)&b_p0_vreg,
+                 (uintptr_t)(b + 0)); /* load and duplicate */
+    // b_p1_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 1));
+    simd_loaddup((uintptr_t)&b_p1_vreg,
+                 (uintptr_t)(b + 1)); /* load and duplicate */
+    // b_p2_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 2));
+    simd_loaddup((uintptr_t)&b_p2_vreg,
+                 (uintptr_t)(b + 2)); /* load and duplicate */
+    // b_p3_vreg.v = _mm_loaddup_pd((fixedpt *)(b + 3));
+    simd_loaddup((uintptr_t)&b_p3_vreg,
+                 (uintptr_t)(b + 3)); /* load and duplicate */
     b += 4;
 
     /* First row and second rows */
-    c_00_c_10_vreg.v += a_0p_a_1p_vreg.v * b_p0_vreg.v;
-    c_01_c_11_vreg.v += a_0p_a_1p_vreg.v * b_p1_vreg.v;
-    c_02_c_12_vreg.v += a_0p_a_1p_vreg.v * b_p2_vreg.v;
-    c_03_c_13_vreg.v += a_0p_a_1p_vreg.v * b_p3_vreg.v;
+    // c_00_c_10_vreg.v += a_0p_a_1p_vreg.v * b_p0_vreg.v;
+    simd_mul_add((uintptr_t)&c_00_c_10_vreg, (uintptr_t)&a_0p_a_1p_vreg,
+                 (uintptr_t)&b_p0_vreg);
+    // c_01_c_11_vreg.v += a_0p_a_1p_vreg.v * b_p1_vreg.v;
+    simd_mul_add((uintptr_t)&c_01_c_11_vreg, (uintptr_t)&a_0p_a_1p_vreg,
+                 (uintptr_t)&b_p1_vreg);
+    // c_02_c_12_vreg.v += a_0p_a_1p_vreg.v * b_p2_vreg.v;
+    simd_mul_add((uintptr_t)&c_02_c_12_vreg, (uintptr_t)&a_0p_a_1p_vreg,
+                 (uintptr_t)&b_p2_vreg);
+    // c_03_c_13_vreg.v += a_0p_a_1p_vreg.v * b_p3_vreg.v;
+    simd_mul_add((uintptr_t)&c_03_c_13_vreg, (uintptr_t)&a_0p_a_1p_vreg,
+                 (uintptr_t)&b_p3_vreg);
 
     /* Third and fourth rows */
-    c_20_c_30_vreg.v += a_2p_a_3p_vreg.v * b_p0_vreg.v;
-    c_21_c_31_vreg.v += a_2p_a_3p_vreg.v * b_p1_vreg.v;
-    c_22_c_32_vreg.v += a_2p_a_3p_vreg.v * b_p2_vreg.v;
-    c_23_c_33_vreg.v += a_2p_a_3p_vreg.v * b_p3_vreg.v;
+    // c_20_c_30_vreg.v += a_2p_a_3p_vreg.v * b_p0_vreg.v;
+    simd_mul_add((uintptr_t)&c_20_c_30_vreg, (uintptr_t)&a_2p_a_3p_vreg,
+                 (uintptr_t)&b_p0_vreg);
+    // c_21_c_31_vreg.v += a_2p_a_3p_vreg.v * b_p1_vreg.v;
+    simd_mul_add((uintptr_t)&c_21_c_31_vreg, (uintptr_t)&a_2p_a_3p_vreg,
+                 (uintptr_t)&b_p1_vreg);
+    // c_22_c_32_vreg.v += a_2p_a_3p_vreg.v * b_p2_vreg.v;
+    simd_mul_add((uintptr_t)&c_22_c_32_vreg, (uintptr_t)&a_2p_a_3p_vreg,
+                 (uintptr_t)&b_p2_vreg);
+    // c_23_c_33_vreg.v += a_2p_a_3p_vreg.v * b_p3_vreg.v;
+    simd_mul_add((uintptr_t)&c_23_c_33_vreg, (uintptr_t)&a_2p_a_3p_vreg,
+                 (uintptr_t)&b_p3_vreg);
   }
 
   C(0, 0) += c_00_c_10_vreg.d[0];
